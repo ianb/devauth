@@ -1,0 +1,50 @@
+DevAuth
+=======
+
+.. contents::
+
+Introduction
+------------
+
+This middleware is written to provide developer access to
+web-accessible developer tools.  It is an authentication system, it
+does not itself provide any tools.  It is *only* intended for
+developers, and is not an authentication system that is usable in
+general-purpose applications.
+
+This is written for `the wsgi.org developer_auth spec
+<http://wsgi.org/wsgi/Specifications/developer_auth>`_.
+
+Usage
+-----
+
+You can use this with `Paste Deploy configuration
+<http://pythonpaste.org/deploy/>`_ (as used in Pylons and Repoze).  It
+looks something like::
+
+  [filter:devauth]
+  use = egg:DevAuth
+  allow = 127.0.0.1
+          192.168.0.0/16
+  # Toby's computer:
+  # (I hate him so much!)
+  deny = 192.168.0.23
+  # File created with htpasswd:
+  password_file = %(here)s/developers.htpasswd
+  # Login expires after 1 hour:
+  # So Toby can't hijack my session by using my computer.
+  # (I hate him so much!)
+  expiration = 60
+
+  [app:myapp]
+  blah blah blah
+
+  [pipeline:main]
+  pipeline = devauth myapp
+
+For Tool Developers
+-------------------
+
+If you want to check if a developer is logged in, look for
+``environ['x-wsgiorg.developer_user']``.  If the page is for
+developers only, then return ``403 Forbidden``.
