@@ -1,7 +1,7 @@
 """
 Intended to be run with nose, or py.test
 """
-from devauth.wsgiapp import DevAuth
+from devauth import DevAuth
 from webtest import TestApp
 import logging
 logging.basicConfig(level=logging.DEBUG)

@@ -30,6 +30,6 @@ setup(name='DevAuth',
       ],
       entry_points="""
       [paste.app_filter_factory]
-      main = devauth.wsgiapp:make_middleware
+      main = devauth:make_middleware
       """,
       )
