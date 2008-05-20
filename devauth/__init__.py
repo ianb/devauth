@@ -259,7 +259,7 @@ def convert_ip_mask(setting):
         result.append(item)
     return result
 
-def make_middleware(global_conf, app, allow=None, deny=None,
+def make_middleware(app, global_conf, allow=None, deny=None,
                     password_file=None, secret_file='/tmp/devauth.txt',
                     secret=None, logger=None, expiration=None):
     allow = convert_ip_mask(allow)
