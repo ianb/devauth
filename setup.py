@@ -27,9 +27,10 @@ setup(name='DevAuth',
       install_requires=[
         'WebOb',
         'Paste',
+        'tempita',
       ],
       entry_points="""
-      [paste.app_filter_factory]
+      [paste.filter_app_factory]
       main = devauth:make_middleware
       """,
       )
