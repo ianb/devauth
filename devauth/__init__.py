@@ -69,6 +69,10 @@ class DevAuth(object):
         login.  So if you give 3600, you will have to re-login every hour.
         """
         self.app = app
+        logger = logger or 'DevAuth'
+        if isinstance(logger, basestring):
+            logger = logging.getLogger(logger)
+        self.logger = logger
         self.allow = convert_ip_mask(allow)
         self.deny = convert_ip_mask(deny)
         if password_checker and password_file:
@@ -84,10 +88,6 @@ class DevAuth(object):
         if secret is None:
             secret = self.read_or_create_secret(secret_file)
         self.secret = secret
-        logger = logger or 'DevAuth'
-        if isinstance(logger, basestring):
-            logger = logging.getLogger(logger)
-        self.logger = logger
         self.login_mountpoint = login_mountpoint.rstrip('/')
         self.expiration = expiration
 
