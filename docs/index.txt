@@ -35,6 +35,8 @@ looks something like::
   # So Toby can't hijack my session by using my computer.
   # (I hate him so much!)
   expiration = 60
+  # You'll login in at /.devauth/login (the default):
+  login_mountpoint = /.devauth
 
   [app:myapp]
   blah blah blah

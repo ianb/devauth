@@ -101,10 +101,10 @@ class DevAuth(object):
             if not os.path.exists(os.path.dirname(filename)):
                 self.logger.info('Creating directory %s' % os.path.dirname(filename))
                 os.makedirs(os.path.dirname(filename))
-            f = open(filename, 'rb')
+            f = open(filename, 'wb')
             f.write(secret)
             f.close()
-            os.chmod(0600, filename)
+            os.chmod(filename, 0600)
             self.logger.info('Wrote new secret to %s' % filename)
         else:
             f = open(filename, 'rb')
@@ -132,6 +132,8 @@ class DevAuth(object):
         try:
             if req.path_info.startswith(self.login_mountpoint + '/login'):
                 return self.login(req)(environ, start_response)
+            if req.path_info.startswith(self.login_mountpoint + '/logout'):
+                return self.logout(req)(environ, start_response)
             if req.cookies.get('__devauth'):
                 username = self.read_cookie(req, req.cookies['__devauth'])
                 if username and not self.check_ip(req):
@@ -230,7 +232,7 @@ class DevAuth(object):
             msg = 'Your session has expired.  You can log in again, or just <a href="%s">return to your previous page</a>' % (
                 html_escape(back))
         template = HTMLTemplate.from_filename(os.path.join(os.path.dirname(__file__), 'login.html'))
-        return Response(template.substitute(req=req, msg=msg, back=back))
+        return Response(template.substitute(req=req, msg=msg, back=back, middleware=self))
 
     def check_login(self, username, password):
         if self.password_checker is not None:
@@ -240,6 +242,15 @@ class DevAuth(object):
                 return check_password(username, password, self.password_file)
             except NoSuchUser:
                 return False
+
+    def logout(self, req):
+        """
+        Logout
+        """
+        back = req.GET.get('back', '/')
+        resp = exc.HTTPFound(back)
+        resp.delete_cookie('__devauth')
+        return resp
 
 def b64encode(s, altchars='_-'):
     """
@@ -261,7 +272,8 @@ def convert_ip_mask(setting):
 
 def make_middleware(app, global_conf, allow=None, deny=None,
                     password_file=None, secret_file='/tmp/devauth.txt',
-                    secret=None, logger=None, expiration=None):
+                    secret=None, logger=None, expiration=None,
+                    login_mountpoint='/.devauth'):
     allow = convert_ip_mask(allow)
     deny = convert_ip_mask(deny)
     if not allow and not deny and not password_file:
@@ -271,6 +283,6 @@ def make_middleware(app, global_conf, allow=None, deny=None,
         expiration = int(expiration)
     return DevAuth(app, allow=allow, deny=deny, password_file=password_file,
                    secret_file=secret_file, secret=None, logger=logger,
-                   expiration=expiration)
+                   expiration=expiration, login_mountpoint=login_mountpoint)
 
 make_middleware.__doc__ == DevAuth.__doc__
