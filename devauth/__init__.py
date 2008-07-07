@@ -157,15 +157,21 @@ class DevAuth(object):
         try:
             username, ip, timestamp, signature = cookie.split('|', 3)
         except ValueError:
-            self.logger.info('Invalid cookie (not enough spaces): %r' % cookie)
+            self.logger.info("Invalid cookie (not enough |'s): %r" % cookie)
+            return None
+        try:
+            timestamp = int(timestamp)
+        except ValueError, e:
+            self.logger.info('Invalid cookie, bad timestamp %r: %s' % (timestamp, e))
             return None
         if ip != req.remote_addr:
             self.logger.info('Invalid cookie; was for IP %s, requested from IP %s: %r'
                               % (ip, req.remote_addr, cookie))
             return None
-        if self.expiration and timestamp + (self.expiration*60) > time.time():
+        if self.expiration and timestamp + (self.expiration*60) < time.time():
             ## FIXME: not sure what to do here?  Ignore?  Redirect?
-            raise exc.HTTPTemporaryRedirect(req.application_url + self.login_mountpoint + '/login?msg=expired&back=%s' % url_quote(req.url)).exception
+            url = req.application_url + self.login_mountpoint + '/login?msg=expired&back=%s' % url_quote(req.url)
+            raise exc.HTTPTemporaryRedirect(location=url).exception
         text = '%s|%s|%s' % (username, ip, timestamp)
         hash = b64encode(hmac.new(username, text, sha).digest())
         if hash != signature:
@@ -232,7 +238,9 @@ class DevAuth(object):
             msg = 'Your session has expired.  You can log in again, or just <a href="%s">return to your previous page</a>' % (
                 html_escape(back))
         template = HTMLTemplate.from_filename(os.path.join(os.path.dirname(__file__), 'login.html'))
-        return Response(template.substitute(req=req, msg=msg, back=back, middleware=self))
+        resp = Response(template.substitute(req=req, msg=msg, back=back, middleware=self))
+        resp.delete_cookie('__devauth')
+        return resp
 
     def check_login(self, username, password):
         if self.password_checker is not None:
