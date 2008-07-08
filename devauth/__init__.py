@@ -239,7 +239,12 @@ class DevAuth(object):
                 html_escape(back))
         template = HTMLTemplate.from_filename(os.path.join(os.path.dirname(__file__), 'login.html'))
         resp = Response(template.substitute(req=req, msg=msg, back=back, middleware=self))
-        resp.delete_cookie('__devauth')
+        try:
+            if req.cookies.get('__devauth'):
+                self.read_cookie(req, req.cookies['__devauth'])
+        except exc.HTTPException:
+            # This means the cookie is invalid
+            resp.delete_cookie('__devauth')
         return resp
 
     def check_login(self, username, password):
@@ -256,7 +261,7 @@ class DevAuth(object):
         Logout
         """
         back = req.GET.get('back', '/')
-        resp = exc.HTTPFound(back)
+        resp = exc.HTTPFound(location=back)
         resp.delete_cookie('__devauth')
         return resp
 
