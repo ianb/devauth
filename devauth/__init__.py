@@ -8,6 +8,7 @@ from webob import exc
 import hmac
 import sha
 import base64
+import tempfile
 from paste.util.ip4 import IP4Range, ip2int
 from tempita import HTMLTemplate
 from devauth.htpasswd import check_password, NoSuchUser
@@ -30,7 +31,7 @@ class DevAuth(object):
 
     def __init__(self, app, allow, deny, password_file=None,
                  password_checker=None,
-                 secret_file='/tmp/devauth.txt', secret=None,
+                 secret_file='$TMP/devauth.txt', secret=None,
                  logger='DevAuth', login_mountpoint='/.devauth',
                  expiration=None):
         """
@@ -55,7 +56,10 @@ class DevAuth(object):
 
         ``secret_file``: a file where the server-side secret will be
         kept.  If this file doesnt exist it will be created and random
-        content will be inserted.
+        content will be inserted.  If you put $TMP in the name of the
+        file, it will be replaced by the temporary directory (which is
+        read from several possible environmental variables, or
+        defaults to ``/tmp``).
 
         ``secret``: instead of storing a secret in a file, you can
         provide the secret at instantiation.
@@ -86,6 +90,7 @@ class DevAuth(object):
         self.password_mtime = None
         self.passwords = {}
         if secret is None:
+            secret_file = secret_file.replace('$TMP', tempfile.gettempdir())
             secret = self.read_or_create_secret(secret_file)
         self.secret = secret
         self.login_mountpoint = login_mountpoint.rstrip('/')
@@ -107,7 +112,11 @@ class DevAuth(object):
             os.chmod(filename, 0600)
             self.logger.info('Wrote new secret to %s' % filename)
         else:
-            f = open(filename, 'rb')
+            try:
+                f = open(filename, 'rb')
+            except:
+                self.logger.fatal('Cannot read secret from secret file %s' % filename)
+                raise
             secret = f.read()
             f.close()
             self.logger.debug('Read secret from %s' % filename)
