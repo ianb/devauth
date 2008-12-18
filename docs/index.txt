@@ -50,3 +50,13 @@ For Tool Developers
 If you want to check if a developer is logged in, look for
 ``environ['x-wsgiorg.developer_user']``.  If the page is for
 developers only, then return ``403 Forbidden``.
+
+News
+----
+
+svn trunk
+~~~~~~~~~
+
+* Change the secret file default location to use the ``TEMP`` variable
+  (and other variables as read by ``tempfile``) for its location,
+  instead of simply being hardcoded to ``/tmp/devauth.txt``.
