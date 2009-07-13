@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = '0.1'
+version = '0.1.1'
 
 index_fn = os.path.join(os.path.dirname(__file__), 'docs', 'index.txt')
 
@@ -19,7 +19,7 @@ setup(name='DevAuth',
       keywords='wsgi debug tool',
       author='Ian Bicking',
       author_email='ianb@openplans.org',
-      url='',
+      url='http://devauth.openplans.org',
       license='MIT',
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
       include_package_data=True,
