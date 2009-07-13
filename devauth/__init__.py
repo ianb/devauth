@@ -29,8 +29,8 @@ class DevAuth(object):
 
     secret_length = 100
 
-    def __init__(self, app, allow, deny, password_file=None,
-                 password_checker=None,
+    def __init__(self, app, allow="127.0.0.1", deny=None,
+                 password_file=None, password_checker=None,
                  secret_file='$TMP/devauth.txt', secret=None,
                  logger='DevAuth', login_mountpoint='/.devauth',
                  expiration=None):
@@ -41,7 +41,7 @@ class DevAuth(object):
 
         ``allow``: a set of IP addresses that are allowed (None for
         all).  This can be a list or string, and can contain IP
-        addresses, IP ranges, or IPs plus a mast.
+        addresses, IP ranges, or IPs plus a mask.
 
         ``deny``: a set of IP addresses that are denied, even if they
         would otherwise be allowed by ``allow``.
@@ -88,7 +88,6 @@ class DevAuth(object):
         self.password_checker = password_checker
         self.password_file = password_file
         self.password_mtime = None
-        self.passwords = {}
         if secret is None:
             secret_file = secret_file.replace('$TMP', tempfile.gettempdir())
             secret = self.read_or_create_secret(secret_file)
