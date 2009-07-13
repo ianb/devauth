@@ -13,6 +13,8 @@ from paste.util.ip4 import IP4Range, ip2int
 from tempita import HTMLTemplate
 from devauth.htpasswd import check_password, NoSuchUser
 
+__all__ = ['DevAuth', 'make_middleware']
+
 class DevAuth(object):
     """
     This is an authentication middleware for developer tools.
