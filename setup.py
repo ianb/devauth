@@ -5,7 +5,7 @@ version = '0.1.1'
 
 index_fn = os.path.join(os.path.dirname(__file__), 'docs', 'index.txt')
 index_text = open(index_fn).read()
-index_text = index_text.split('..contents::')[1].strip()
+index_text = index_text.split('.. contents::')[1].strip()
 
 setup(name='DevAuth',
       version=version,
