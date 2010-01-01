@@ -6,7 +6,10 @@ from webob import Request, Response, html_escape
 from urllib import quote as url_quote
 from webob import exc
 import hmac
-import sha
+try:
+    from hashlib import sha1 as sha
+except ImportError:
+    import sha
 import base64
 import tempfile
 from paste.util.ip4 import IP4Range, ip2int
