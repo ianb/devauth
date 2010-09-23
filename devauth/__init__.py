@@ -148,7 +148,7 @@ class DevAuth(object):
             if req.path_info.startswith(self.login_mountpoint + '/logout'):
                 return self.logout(req)(environ, start_response)
             if req.cookies.get('__devauth'):
-                username = self.read_cookie(req, req.cookies['__devauth'])
+                username = self.read_cookie(req, req.str_cookies['__devauth'])
                 if username and not self.check_ip(req):
                     self.logger.warning(
                         'User %r tried to log in from bad IP %s (X-Forwarded-For: %s)' % (
@@ -236,8 +236,8 @@ class DevAuth(object):
             template = HTMLTemplate.from_filename(os.path.join(os.path.dirname(__file__), 'ip_denied.html'))
             return Response(template.substitute(req=req), status='403 Forbidden')
         if req.method == 'POST':
-            username = req.POST['username']
-            password = req.POST['password']
+            username = req.str_POST['username']
+            password = req.str_POST['password']
             if not self.check_login(username, password):
                 msg = 'Invalid username or password'
             else:
@@ -254,7 +254,7 @@ class DevAuth(object):
         resp = Response(template.substitute(req=req, msg=msg, back=back, middleware=self))
         try:
             if req.cookies.get('__devauth'):
-                self.read_cookie(req, req.cookies['__devauth'])
+                self.read_cookie(req, req.str_cookies['__devauth'])
         except exc.HTTPException:
             # This means the cookie is invalid
             resp.delete_cookie('__devauth')
